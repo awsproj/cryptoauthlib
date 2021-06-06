@@ -136,6 +136,7 @@ typedef struct atca_i2c_host_s
 ATCA_STATUS hal_i2c_init(ATCAIface iface, ATCAIfaceCfg* cfg)
 {
     ATCA_STATUS ret = ATCA_BAD_PARAM;
+logdbg("\n");
 
     if (!iface || !cfg)
     {
@@ -155,6 +156,7 @@ ATCA_STATUS hal_i2c_init(ATCAIface iface, ATCAIfaceCfg* cfg)
     {
         atca_i2c_host_t * hal_data = malloc(sizeof(atca_i2c_host_t));
         int bus = cfg->atcai2c.bus; // 0-based logical bus number
+logdbg("HAL dump:  i2c  bus %d  slave_address %u\n", bus, 1234/*cfg->atcai2c.slave_address*/);
 
         if (hal_data)
         {
@@ -196,6 +198,7 @@ ATCA_STATUS hal_i2c_post_init(ATCAIface iface)
 
 ATCA_STATUS hal_i2c_send(ATCAIface iface, uint8_t address, uint8_t *txdata, int txlength)
 {
+logdbg("\n");
     atca_i2c_host_t * hal_data = (atca_i2c_host_t*)atgetifacehaldat(iface);
     int f_i2c;  // I2C file descriptor
 
@@ -204,6 +207,7 @@ ATCA_STATUS hal_i2c_send(ATCAIface iface, uint8_t address, uint8_t *txdata, int 
         return ATCA_NOT_INITIALIZED;
     }
 
+    #if 0
     // Initiate I2C communication
     if ( (f_i2c = open(hal_data->i2c_file, O_RDWR)) < 0)
     {
@@ -226,6 +230,37 @@ ATCA_STATUS hal_i2c_send(ATCAIface iface, uint8_t address, uint8_t *txdata, int 
 
     close(f_i2c);
     return ATCA_SUCCESS;
+    #endif
+    ATCA_STATUS rstatus = ATCA_GEN_FAIL; // unspecified error
+    INC_SEQN;
+    if ( win32_ctypes__callback_funcp == NULL ) {
+        rstatus = ATCA_COMM_FAIL;
+        logwarn(" Error: win32_ctypes__callback_funcp null\n");
+    } else if (txlength <= 0 || txlength >= sizeof(win32_ctypes_req_resp_data.buf) ) {
+        rstatus = ATCA_BAD_PARAM;
+        logwarn(" Error: txlength %d out of range\n", txlength);
+    } else {
+        memset(&win32_ctypes_req_resp_data, 0, sizeof(win32_ctypes_req_resp_data));
+        win32_ctypes_req_resp_data.req_seqn = win32_ctypes_req_seqn;
+        memcpy(win32_ctypes_req_resp_data.buf, txdata, (uint32_t)txlength);
+        win32_ctypes_req_resp_data.data_len_in = (uint16_t)txlength;
+        logdbg("  calling callback function \n");
+        int r1 = (*win32_ctypes__callback_funcp)(WIN32_CTYPES_FUNC_SEND,
+                                                 win32_ctypes_req_seqn, (uint32_t)txlength);
+        logdbg("  returned from callback function r1 %d\n", r1);
+        if ( r1 != ATCA_SUCCESS ) {
+            rstatus = r1;
+            logwarn(" status %d\n", rstatus);
+        } else if ( win32_ctypes_req_resp_data.req_seqn != win32_ctypes_req_seqn ) {
+            rstatus = ATCA_COMM_FAIL;
+            logwarn(" status %d due to seqn mismatch\n", rstatus);
+        } else {
+            rstatus = ATCA_SUCCESS;
+            logdbg(" status %d\n", rstatus);
+        }
+    }
+
+    return rstatus;
 }
 
 /** \brief HAL implementation of I2C receive function
@@ -238,6 +273,7 @@ ATCA_STATUS hal_i2c_send(ATCAIface iface, uint8_t address, uint8_t *txdata, int 
  */
 ATCA_STATUS hal_i2c_receive(ATCAIface iface, uint8_t address, uint8_t *rxdata, uint16_t *rxlength)
 {
+logdbg("\n");
     atca_i2c_host_t * hal_data = (atca_i2c_host_t*)atgetifacehaldat(iface);
     int f_i2c;  // I2C file descriptor
 
@@ -246,6 +282,7 @@ ATCA_STATUS hal_i2c_receive(ATCAIface iface, uint8_t address, uint8_t *rxdata, u
         return ATCA_NOT_INITIALIZED;
     }
 
+    #if 0
     // Initiate I2C communication
     if ( (f_i2c = open(hal_data->i2c_file, O_RDWR)) < 0)
     {
@@ -267,6 +304,56 @@ ATCA_STATUS hal_i2c_receive(ATCAIface iface, uint8_t address, uint8_t *rxdata, u
 
     close(f_i2c);
     return ATCA_SUCCESS;
+    #endif
+
+    ATCA_STATUS rstatus = ATCA_GEN_FAIL; // unspecified error
+    INC_SEQN;
+    uint16_t rxdata_max_size = *rxlength;
+
+    if ( win32_ctypes__callback_funcp == NULL ) {
+        rstatus = ATCA_COMM_FAIL;
+        logwarn(" Error: win32_ctypes__callback_funcp null\n");
+    } else if (rxdata_max_size >= sizeof(win32_ctypes_req_resp_data.buf) ) {
+        rstatus = ATCA_BAD_PARAM;
+        logwarn(" Error: rxlength %d out of range\n", rxdata_max_size);
+    } else {
+        memset(&win32_ctypes_req_resp_data, 0, sizeof(win32_ctypes_req_resp_data));
+        win32_ctypes_req_resp_data.req_seqn = win32_ctypes_req_seqn;
+        win32_ctypes_req_resp_data.data_len_in = (uint16_t)rxdata_max_size;
+        logdbg("  calling callback function \n");
+        int r1 = (*win32_ctypes__callback_funcp)(WIN32_CTYPES_FUNC_RECV,
+                                                 win32_ctypes_req_seqn, (uint32_t)rxdata_max_size);
+        logdbg("  returned from callback function r1 %d\n", r1);
+        if ( r1 != ATCA_SUCCESS ) {
+            rstatus = r1;
+            logwarn(" status %d\n", rstatus);
+        } else if ( win32_ctypes_req_resp_data.req_seqn != win32_ctypes_req_seqn ) {
+            rstatus = ATCA_COMM_FAIL;
+            logwarn(" status %d due to seqn mismatch\n", rstatus);
+        } else {
+            uint32_t dlen = win32_ctypes_req_resp_data.data_len_out;
+            if ( dlen < 1 || dlen >= sizeof(win32_ctypes_req_resp_data.buf) ) {
+                rstatus = ATCA_COMM_FAIL;
+                //logwarn(" status %d due to rxlength %u invalid\n", rstatus, dlen);
+                logdbg(" status %d\n", rstatus);
+            } else if ( dlen > rxdata_max_size ) {
+                rstatus = ATCA_COMM_FAIL;
+                logwarn(" status %d due to rxlength %u overflow %u\n", rstatus, dlen,
+                            rxdata_max_size);
+            } else if ( dlen != win32_ctypes_req_resp_data.buf[0] ) {
+                rstatus = ATCA_COMM_FAIL;
+                logwarn(" status %d due to rxlength %u mismatch data[0] %u\n", rstatus, dlen,
+                            win32_ctypes_req_resp_data.buf[0]);
+            } else {
+                memcpy(rxdata, win32_ctypes_req_resp_data.buf, dlen);
+                *rxlength = dlen;
+                rstatus = ATCA_SUCCESS;
+                logdbg(" status %d\n", rstatus);
+            }
+        }
+    }
+
+    return rstatus;
 }
 
 /** \brief Perform control operations for the kit protocol
@@ -297,6 +384,7 @@ ATCA_STATUS hal_i2c_control(ATCAIface iface, uint8_t option, void* param, size_t
 
 ATCA_STATUS hal_i2c_release(void *hal_data)
 {
+logdbg("\n");
     atca_i2c_host_t *hal = (atca_i2c_host_t*)hal_data;
 
     // if the use count for this bus has gone to 0 references, disable it.  protect against an unbracketed release

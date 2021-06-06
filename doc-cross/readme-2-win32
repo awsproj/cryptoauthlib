@@ -41,6 +41,11 @@ at the top directory:
 
     python readme-2-win32-build.py
 
+  test the built .dll :
+
+    cp -uv build/output/cryptoauth.dll python/cryptoauthlib/
+    python python/tdd_win32_ctypes/demo1_init.py
+    
 
 screen output:
     ....

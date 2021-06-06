@@ -48,16 +48,16 @@ typedef struct atcaI2Cmaster
 
 
 /* debug logger */
-//#define logdbg(...) do{printf("DBG %s ", __func__);printf("" __VA_ARGS__ );}while(0)
-#define logdbg(...) do{;}while(0)
+#define logdbg(...) do{printf("DBG %s ", __func__);printf("" __VA_ARGS__ );}while(0)
+//#define logdbg(...) do{;}while(0)
 #define logwarn(...) do{fprintf(stderr, "WARN %s ", __func__);\
                         fprintf(stderr, "" __VA_ARGS__ );}while(0)
 
 
 /* interface function selector */
-#define WIN32_CTYPES_FUNC_WAKE  (1)
-#define WIN32_CTYPES_FUNC_IDLE  (2)
-#define WIN32_CTYPES_FUNC_SLEEP (3)
+//#define WIN32_CTYPES_FUNC_WAKE  (1)
+//#define WIN32_CTYPES_FUNC_IDLE  (2)
+//#define WIN32_CTYPES_FUNC_SLEEP (3)
 #define WIN32_CTYPES_FUNC_SEND  (4)
 #define WIN32_CTYPES_FUNC_RECV  (5)
 

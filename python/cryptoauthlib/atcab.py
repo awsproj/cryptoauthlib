@@ -22,6 +22,7 @@ Dynamic link library loading under ctypes and HAL initilization/release function
 # THIS SOFTWARE.
 
 from ctypes import c_uint8, c_uint32, byref, create_string_buffer, Structure, c_char, c_uint16, c_bool
+from ctypes import c_void_p
 from .status import Status
 from .library import get_cryptoauthlib, AtcaReference
 
