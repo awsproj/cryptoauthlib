@@ -1,0 +1,40 @@
+#!/bin/bash
+#readme-1-cross
+
+# build command:  bash readme-1-cross
+# install:  take the "build/libcryptoauth.so" and "lib/*.h" to the build machine and the target.
+
+#gcc: ~/buildroot/output/the_target/host/bin/arm-linux-gnueabihf-gcc
+#env: export PATH=$(pwd)/../buildroot/output/the_target/host/bin/:$PATH
+export CC=arm-linux-gnueabihf-gcc
+
+if [ -d build ]; then
+    echo Removing \"build/\" directory
+    rm -r build
+fi
+mkdir -vp build
+cd build
+echo -n pwd ' '; pwd
+cmake ../lib -DATCA_HAL_CUSTOM=ON \
+             -DATCA_HAL_I2C=ON    \
+
+#             -DATCACERT_DEF_SRC=../atca_utils_sizes.c
+
+rc=$?
+if [ $rc -ne 0 ]; then
+    echo; echo Failed in cmake; echo
+    cd ..
+    exit 1
+fi
+
+make VERBOSE=1
+if [ $rc -ne 0 ]; then
+    echo; echo Failed in make; echo
+    cd ..
+    exit 1
+fi
+
+echo; echo OK. Successfully built; echo
+cd ..
+exit 0
+

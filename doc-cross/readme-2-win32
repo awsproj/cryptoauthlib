@@ -1,0 +1,64 @@
+
+
+at the top directory:
+
+  make sure the cmake is at ../cmake-bin/cmake_3_20_1_x86_64
+  otherwise modify the main py to adjust
+
+  run from cygwin:
+
+    cp doc-cross/readme-2-win32-build.py
+    #cp lib/atca_utils_sizes.c .
+    touch hal_win32_ctypes_i2c_userspace.h
+    cd lib/hal
+    cp hal_linux_i2c_userspace.c hal_win32_ctypes_i2c_userspace.c
+    cd ../..
+
+  modify the newly created  hal_win32_ctypes_i2c_userspace.c :
+        remove use of  linux/i2c-dev.h, unistd.h, sys/ioctl.h, fcntl.h
+        add use of  hal_win32_ctypes_i2c_userspace.h
+        add local data  win32_ctypes_req_seqn, and  win32_ctypes_req_resp_data
+        add exposed  hal_win32_ctypes_register_cb(), and hal_win32_ctypes_get_request(),
+                     hal_win32_ctypes_put_response()
+  modify the newly created  hal_win32_ctypes_i2c_userspace.h :
+        add content to it.
+  modify lib/CMakefileLists.txt :
+        add the line for hal/hal_win32_ctypes_i2c_userspace.c
+
+         if(WIN32)
+         set(CRYPTOAUTH_SRC ${CRYPTOAUTH_SRC} hal/hal_windows.c)
+        +set(TWI_SRC hal/hal_win32_ctypes_i2c_userspace.c) # for win32_ctypes
+         set(HID_SRC ../third_party/hidapi/windows/hid.c)
+
+  notes previous reference work :
+        adding  nousb = True  to setup.py to dump the command for reference.
+  inspect the new .c file :
+    cd lib/hal
+    diff -u hal_linux_i2c_userspace.c hal_win32_ctypes_i2c_userspace.c
+    cd ../..
+
+  run from windows cmd prompt to build:
+
+    python readme-2-win32-build.py
+
+
+screen output:
+    ....
+     config output lines:  636
+     build output lines:  112767
+
+     config output lines:
+     -- Building for: Visual Studio 14 2015
+    -- Selecting Windows SDK version  to target Windows 10.0.19042.
+    -- The C compiler identification is MSVC 19.0.24215.1
+    -- Detecting C compiler ABI info
+    -- Detecting C compiler ABI info - done
+    -- Check for working C compiler: C:/Program Files (x86)/Microsoft Visual Studio 14.0/VC/bin/x86_amd64/cl.exe - skipped
+    -- Detecting C compile features
+    ....
+     build output lines:
+     Microsoft (R) Build Engine version 14.0.25420.1
+    Copyright (C) Microsoft Corporation. All rights reserved.
+
+    Build started 6/6/2021 6:47:21 AM.
+    ....

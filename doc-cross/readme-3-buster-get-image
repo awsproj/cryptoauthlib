@@ -1,0 +1,34 @@
+
+pull the image:
+
+    $ docker pull debian:buster-20201209-slim@0be051a146232e03a67332f2ed33184f0d9efb7e8fbb2d6a091a47f9732e025d
+    invalid reference format
+
+    $ docker pull arm32v7/debian:buster-20201209-slim
+    buster-20201209-slim: Pulling from arm32v7/debian
+    c06905228d4f: Pull complete
+    Digest: sha256:0be051a146232e03a67332f2ed33184f0d9efb7e8fbb2d6a091a47f9732e025d
+    Status: Downloaded newer image for arm32v7/debian:buster-20201209-slim
+    docker.io/arm32v7/debian:buster-20201209-slim
+
+
+save the image:
+
+    docker save -o buster-img.tar arm32v7/debian:buster-20201209-slim
+    mkdir tmp1
+    cd tmp1
+    tar xf ../buster-img.tar
+    mv b11dc122b.../layer.tar ../buster-20201209-slim-layer-armv7debian.tar
+    cd ..
+    rm -r tmp1
+
+
+push the tar to a target. use the start script to run.
+
+
+update 3/30/2021:
+  buster images: buster-slim, buster-20210329-slim, 10.9-slim, 10-slim
+  use: buster-20210329-slim
+  save: buster-img-20210329-slim.tar
+  take the layer.tar to: buster-armv7debian-20210329-slim-layer.tar
+

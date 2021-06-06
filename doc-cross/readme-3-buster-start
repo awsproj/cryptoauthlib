@@ -1,0 +1,31 @@
+#!/bin/ash
+#  readme-3-buster-start
+#  place this to the buster root directory to start a chroot bash shell
+
+if [ ! -d proc ]; then
+    echo Error: no proc directory. probably not under a buster-root directory.
+    exit 1
+fi
+
+if [ ! -d root-old-by-sdk ]; then
+    mkdir -v root-old-by-sdk
+fi
+
+if [ ! -d proc/1 ]; then
+    mount -o bind /proc proc
+    mount -o bind /dev  dev
+    mount -o bind /sys  sys
+    mount -o bind /dev/pts  dev/pts
+    chmod a+rwx dev/tty
+    chmod a+rw dev/null
+    chmod a+rw dev/zero
+    if [ -d usr/local/libexec ]; then
+        chmod a+rx usr/local/libexec
+    fi
+    if [ -f etc/ssh/sshd_config ]; then
+        sed -i -e 's/^#AllowTcpForwarding yes/AllowTcpForwarding yes/' etc/ssh/sshd_config
+    fi
+fi
+
+chroot . /lib/arm-linux-gnueabihf/ld-2.28.so /bin/bash
+

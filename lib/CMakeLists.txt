@@ -215,6 +215,7 @@ endif()
 
 if(WIN32)
 set(CRYPTOAUTH_SRC ${CRYPTOAUTH_SRC} hal/hal_windows.c)
+set(TWI_SRC hal/hal_win32_ctypes_i2c_userspace.c) # for win32_ctypes
 set(HID_SRC ../third_party/hidapi/windows/hid.c)
 set(CDC_SRC hal/hal_win_kit_cdc.c)
 elseif(APPLE)

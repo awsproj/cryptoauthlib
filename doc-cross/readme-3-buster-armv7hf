@@ -1,0 +1,27 @@
+#
+# readme-3-buster-armv7hf
+
+# start with a buster chroot environment.
+# installed python3, python3-dev, python3-venv, gcc, libffi-dev, libssl-dev.
+
+# install cmake, make, g++:
+#   apt-get install --no-install-recommends cmake
+#   apt-get install --no-install-recommends make
+#   apt-get install --no-install-recommends g++
+
+# manual commands to verify the build tools:
+#   mkdir build2
+#   cd build2
+#   sh ../readme-3-buster-armv7hf
+
+cmake /home/yourusername/cryptoauthlib/lib \
+    -DATCA_HAL_CUSTOM=ON \
+    -DCMAKE_LIBRARY_OUTPUT_DIRECTORY=/home/yourusername/cryptoauthlib/build2/lib.linux-armv7l-3.7/cryptoauthlib \
+    -DATCA_HAL_I2C=ON \
+
+#    -DATCACERT_DEF_SRC=/home/yourusername/cryptoauthlib/atca_utils_sizes.c
+
+# actual command to build and install:
+#   cd ..
+#   python setup.py install
+
